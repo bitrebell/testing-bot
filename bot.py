@@ -37,6 +37,34 @@ def demote_admin(update, context):
     context.bot.promote_chat_member(update.effective_chat.id, user_id, can_change_info=False, can_delete_messages=False)
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"Demoted {update.message.reply_to_message.from_user.first_name} to user!")
 
+# Function to welcome new members to the group
+def welcome(update, context):
+    user = update.message.new_chat_members[0]
+    chat_id = update.message.chat_id
+    welcome_message = f"Welcome, {user.mention_html()} to the group!"
+    context.bot.send_message(chat_id=chat_id, text=welcome_message, parse_mode='HTML')
+
+# Function to ban a user
+def ban(update, context):
+    user_id = update.message.reply_to_message.from_user.id
+    chat_id = update.message.chat_id
+    context.bot.kick_chat_member(chat_id=chat_id, user_id=user_id)
+
+# Function to unban a user
+def unban(update, context):
+    user_id = update.message.reply_to_message.from_user.id
+    chat_id = update.message.chat_id
+    context.bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
+
+# Function to kick a user
+def kick(update, context):
+    user_id = update.message.reply_to_message.from_user.id
+    chat_id = update.message.chat_id
+    context.bot.kick_chat_member(chat_id=chat_id, user_id=user_id)
+    context.bot.unban_chat_member(chat_id=chat_id, user_id=user_id)  # Unban after kicking
+
+
+
 # Handlers for commands
 start_handler = CommandHandler('start', start)
 add_member_handler = CommandHandler('add', add_member)
@@ -49,7 +77,10 @@ dispatcher.add_handler(add_member_handler)
 dispatcher.add_handler(remove_member_handler)
 dispatcher.add_handler(promote_admin_handler)
 dispatcher.add_handler(demote_admin_handler)
-
+dispatcher.add_handler(CommandHandler("ban", ban))
+dispatcher.add_handler(CommandHandler("unban", unban))
+dispatcher.add_handler(CommandHandler("kick", kick))
+dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome))
 # Start the bot
 updater.start_polling()
 
